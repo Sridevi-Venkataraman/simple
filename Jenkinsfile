@@ -47,7 +47,7 @@ pipeline {
   
   post {        
     success { 
-      echo 'Pipeline succeeded' 
+      echo 'Pipeline succeeded successfully' 
     }        
     failure { 
       echo 'Pipeline failed - open the red stage logs' 
