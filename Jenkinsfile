@@ -1,56 +1,23 @@
 pipeline {
-  agent any    
-  options {        
-    buildDiscarder(logRotator(numToKeepStr: '5'))        
-    timeout(time: 5, unit: 'MINUTES')    
-  }    
-  
-  parameters {        
-    choice(name: 'TARGET_ENV',               
-           choices: ['dev', 'qa', 'prod'],               
-           description: 'Where to deploy')        
-    booleanParam(name: 'RUN_TESTS',                     
-                 defaultValue: true,                     
-                 description: 'Run test.sh?')    
-  }    
-  
-  environment {        
-    APP_NAME = 'day1-app'    
-  }    
-  
-  stages {        
-    stage('Build') {            
-      steps {                
-        sh 'bash build.sh'            
-      }        
-    }        
-    
-    stage('Test') {            
-      when { expression { params.RUN_TESTS } }            
-      steps {                
-        sh 'bash test.sh'            
-      }        
-    }        
-    stage('Package') {            
-      steps {                
-        archiveArtifacts artifacts: 'dist/**', fingerprint: true            
-      }        
-    }        
-    
-    stage('Deploy') {            
-      steps {                
-        echo "Deploying ${env.APP_NAME} #${env.BUILD_NUMBER}"                
-        echo "Target environment: ${params.TARGET_ENV}"            
-      }        
-    }    
-  }    
-  
-  post {        
-    success { 
-      echo 'Pipeline succeeded successfully' 
-    }        
-    failure { 
-      echo 'Pipeline failed - open the red stage logs' 
-    }    
-  } 
+agent any
+options { buildDiscarder(logRotator(numToKeepStr: '5')) }
+stages {
+stage('Build') {
+steps {
+echo "Branch: ${env.BRANCH_NAME}"
+sh 'bash build.sh'
+}
+}
+stage('Test') {
+steps {
+sh 'bash test.sh'
+}
+}
+stage('Deploy') {
+when { branch 'main' }
+steps {
+echo "Deploying build ${BUILD_NUMBER} from main"
+}
+}
+}
 }
